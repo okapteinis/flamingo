@@ -140,12 +140,12 @@ if ( is_wp_error( $post_id ) ) {
 **Findings:**
 1. **No Deprecated Functions Detected** - The plugin uses modern WordPress APIs throughout
 2. **Proper Use of Modern WordPress Functions:**
-   - `wp_json_encode()` instead of `json_encode()` (csv.php:306)
-   - `wp_timezone()` for timezone handling (class-contact.php:131, class-inbound-message.php:267)
-   - `wp_admin_notice()` for admin notices (admin.php:150)
-   - `get_views_links()` for list table views (class-inbound-messages-list-table.php:178)
+   - `wp_json_encode()` instead of `json_encode()` (includes/csv.php:306)
+   - `wp_timezone()` for timezone handling (includes/class-contact.php:131, includes/class-inbound-message.php:267)
+   - `wp_admin_notice()` for admin notices (admin/admin.php:150)
+   - `get_views_links()` for list table views (admin/includes/class-inbound-messages-list-table.php:178)
 3. **Database Queries Use Prepared Statements:**
-   - Proper use of `$wpdb->prepare()` with `%i` and `%s` placeholders (admin-functions.php:22-26)
+   - Proper use of `$wpdb->prepare()` with `%i` and `%s` placeholders (admin/includes/admin-functions.php:22-26)
 4. **Correct Hook Implementation:**
    - All actions and filters use proper WordPress hook system
    - Static closures used appropriately (flamingo.php:57)
@@ -204,13 +204,13 @@ Flamingo should work seamlessly with ClassicPress (WordPress fork maintaining th
 
 #### 1. Security Implementation
 - **CSRF Protection:** Comprehensive nonce verification before all state-changing operations
-  - `check_admin_referer()` used consistently (admin.php:174, 205, 390, 415, etc.)
+  - `check_admin_referer()` used consistently (admin/admin.php:174, 205, 390, 415, etc.)
   - Unique nonces for each action type
 - **Capability Checks:** Proper permission verification before sensitive operations
-  - Custom capabilities mapped to WordPress capabilities (capabilities.php:3-27)
+  - Custom capabilities mapped to WordPress capabilities (includes/capabilities.php:3-27)
   - `current_user_can()` checks before edit/delete operations
 - **SQL Injection Prevention:** All database queries use prepared statements
-  - Example: `$wpdb->prepare()` with proper placeholders (admin-functions.php:22)
+  - Example: `$wpdb->prepare()` with proper placeholders (admin/includes/admin-functions.php:22)
 - **Output Escaping:** Consistent use of escaping functions
   - `esc_html()`, `esc_attr()`, `esc_url()` used throughout
   - `wp_kses_post()` and `wp_kses_data()` for rich content
@@ -235,7 +235,7 @@ Flamingo should work seamlessly with ClassicPress (WordPress fork maintaining th
 
 #### 4. Privacy Compliance
 - **GDPR Support:**
-  - Personal data eraser implementation (privacy.php)
+  - Personal data eraser implementation (admin/includes/privacy.php)
   - Privacy notices in readme.txt
   - Proper handling of personal information
 
@@ -262,7 +262,7 @@ Flamingo should work seamlessly with ClassicPress (WordPress fork maintaining th
 #### 3. Performance Optimization Opportunities
 
 **Finding 1: Unbounded Queries**
-**Location:** `includes/csv.php:47`, `csv.php:107`
+**Location:** `includes/csv.php:47`, `includes/csv.php:107`
 ```php
 $args = array(
     'posts_per_page' => -1,  // Gets all posts
@@ -315,7 +315,7 @@ foreach ( (array) $terms as $term ) {
 ### Priority 1: Security Enhancements
 
 1. **Sanitize Contact Input Data**
-   - Implement explicit sanitization for `$_POST['contact']` in admin.php:176
+   - Implement explicit sanitization for `$_POST['contact']` in admin/admin.php:176
    - Add type validation for expected fields
    - Sanitize the contact name field before assignment
 

@@ -173,9 +173,24 @@ function flamingo_load_contact_admin() {
 
 			check_admin_referer( 'flamingo-update-contact_' . $post->id() );
 
-			$post->props = (array) $_POST['contact'];
+			// Sanitize contact properties to prevent data integrity and XSS issues
+		$contact_data = array();
+		if ( isset( $_POST['contact'] ) && is_array( $_POST['contact'] ) ) {
+			foreach ( $_POST['contact'] as $key => $value ) {
+				$sanitized_key = sanitize_key( $key );
+				if ( is_array( $value ) ) {
+					$contact_data[$sanitized_key] = array_map( 'sanitize_text_field', $value );
+				} else {
+					$contact_data[$sanitized_key] = sanitize_text_field( $value );
+				}
+			}
+		}
+		$post->props = $contact_data;
 
-			$post->name = trim( $_POST['contact']['name'] );
+			// Sanitize contact name field
+		$post->name = isset( $_POST['contact']['name'] )
+			? sanitize_text_field( trim( $_POST['contact']['name'] ) )
+			: '';
 
 			$post->tags = (
 				! empty( $_POST['tax_input'][Flamingo_Contact::contact_tag_taxonomy] )

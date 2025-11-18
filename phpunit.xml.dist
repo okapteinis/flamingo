@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<phpunit
+	bootstrap="tests/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	convertErrorsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
+	>
+	<testsuites>
+		<testsuite name="security">
+			<directory suffix=".php">./tests/security/</directory>
+		</testsuite>
+		<testsuite name="integration">
+			<directory suffix=".php">./tests/integration/</directory>
+		</testsuite>
+		<testsuite name="compatibility">
+			<directory suffix=".php">./tests/compatibility/</directory>
+		</testsuite>
+	</testsuites>
+	<php>
+		<const name="WP_TESTS_PHPUNIT_POLYFILLS_PATH" value="vendor/yoast/phpunit-polyfills"/>
+	</php>
+	<filter>
+		<whitelist processUncoveredFilesFromWhitelist="true">
+			<directory suffix=".php">./includes</directory>
+			<directory suffix=".php">./admin</directory>
+			<file>./flamingo.php</file>
+		</whitelist>
+	</filter>
+</phpunit>

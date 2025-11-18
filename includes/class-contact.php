@@ -1,19 +1,84 @@
 <?php
+/**
+ * Flamingo_Contact class
+ *
+ * Manages contact records in the Flamingo address book.
+ * Contacts are stored as custom post types with metadata.
+ *
+ * @package Flamingo
+ * @since 1.0.0
+ */
 
 class Flamingo_Contact {
 
+	/**
+	 * Custom post type identifier for contacts.
+	 *
+	 * @var string
+	 */
 	const post_type = 'flamingo_contact';
+
+	/**
+	 * Taxonomy identifier for contact tags.
+	 *
+	 * @var string
+	 */
 	const contact_tag_taxonomy = 'flamingo_contact_tag';
 
+	/**
+	 * Total number of items found in last query.
+	 *
+	 * @var int
+	 */
 	private static $found_items = 0;
 
+	/**
+	 * Contact post ID.
+	 *
+	 * @var int
+	 */
 	private $id;
+
+	/**
+	 * Contact email address.
+	 *
+	 * @var string
+	 */
 	public $email;
+
+	/**
+	 * Contact name.
+	 *
+	 * @var string
+	 */
 	public $name;
+
+	/**
+	 * Additional contact properties.
+	 *
+	 * @var array
+	 */
 	public $props = array();
+
+	/**
+	 * Contact tags.
+	 *
+	 * @var array
+	 */
 	public $tags = array();
+
+	/**
+	 * Last contact date and time.
+	 *
+	 * @var string
+	 */
 	public $last_contacted;
 
+	/**
+	 * Registers the contact custom post type and taxonomy.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function register_post_type() {
 		register_post_type( self::post_type, array(
 			'labels' => array(
@@ -35,6 +100,14 @@ class Flamingo_Contact {
 		) );
 	}
 
+	/**
+	 * Finds contacts based on given criteria.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string|array $args Query arguments.
+	 * @return Flamingo_Contact[] Array of contact objects.
+	 */
 	public static function find( $args = '' ) {
 		$defaults = array(
 			'posts_per_page' => 10,
@@ -166,6 +239,15 @@ class Flamingo_Contact {
 		return $this->id;
 	}
 
+	/**
+	 * Saves the contact to the database.
+	 *
+	 * Creates a new contact post or updates an existing one with all metadata.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return int|false Post ID on success, false on failure.
+	 */
 	public function save() {
 		$post_title = $this->email;
 		$post_name = strtr( $this->email, '@', '-' );
@@ -188,6 +270,16 @@ class Flamingo_Contact {
 
 		$post_id = wp_insert_post( $postarr );
 
+		// Check for errors during post insertion
+		if ( is_wp_error( $post_id ) ) {
+			error_log( sprintf(
+				'Flamingo: Failed to save contact "%s" - %s',
+				$this->email,
+				$post_id->get_error_message()
+			) );
+			return false;
+		}
+
 		if ( $post_id ) {
 			$this->id = $post_id;
 			update_post_meta( $post_id, '_email', $this->email );
@@ -195,7 +287,16 @@ class Flamingo_Contact {
 			update_post_meta( $post_id, '_props', $this->props );
 			update_post_meta( $post_id, '_last_contacted', $this->last_contacted );
 
-			wp_set_object_terms( $this->id, $this->tags, self::contact_tag_taxonomy );
+			$term_result = wp_set_object_terms( $this->id, $this->tags, self::contact_tag_taxonomy );
+
+			// Check for errors during term assignment
+			if ( is_wp_error( $term_result ) ) {
+				error_log( sprintf(
+					'Flamingo: Failed to set tags for contact "%s" - %s',
+					$this->email,
+					$term_result->get_error_message()
+				) );
+			}
 		}
 
 		return $post_id;

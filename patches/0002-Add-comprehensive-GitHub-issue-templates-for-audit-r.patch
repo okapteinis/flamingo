@@ -1,0 +1,1905 @@
+From 80a386c4a49a50bdb6b6c0db4f63c6044c25c31e Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 18 Nov 2025 07:33:57 +0000
+Subject: [PATCH 2/4] Add comprehensive GitHub issue templates for audit
+ recommendations
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This commit adds detailed GitHub issue templates for all recommendations
+from the security audit, organized by priority level.
+
+## Issue Templates Created
+
+### Priority 1: Security Enhancements (2 issues)
+1. Enhance CSV Formula Injection Protection
+   - Replace warning messages with industry-standard single quote prefix
+   - Prevents formula execution in all spreadsheet applications
+   - Location: includes/csv.php
+
+2. Add Comprehensive Input Validation
+   - Validation layer before data sanitization
+   - Email format validation and length checks
+   - Type validation for all input data
+   - Locations: Multiple files
+
+### Priority 2: Code Quality Improvements (3 issues)
+1. Optimize CSV Export for Large Datasets
+   - Batched processing to prevent memory exhaustion
+   - Streaming output for better user experience
+   - Handles 100,000+ records without timeouts
+   - Location: includes/csv.php
+
+2. Fix N+1 Query Problem in Contact History
+   - Single optimized query instead of loop queries
+   - Dramatically improves performance
+   - Reduces queries from O(n*m) to O(1)
+   - Location: admin/includes/class-contacts-list-table.php
+
+3. Implement Transient Caching for Taxonomy Terms
+   - Cache frequently accessed terms
+   - Reduces database load
+   - Automatic cache invalidation
+   - Locations: Multiple files
+
+### Priority 3: Feature Enhancements (3 issues)
+1. Implement Configurable Debug Logging
+   - Admin UI for viewing logs
+   - Multiple log levels (error, warning, info, debug)
+   - In-admin log viewer
+   - Optional database logging
+   - Files: New admin pages
+
+2. Add Database Cleanup and Data Integrity Tools
+   - Orphaned metadata cleanup
+   - Duplicate contact detection
+   - Empty contact removal
+   - Unused term cleanup
+   - Files: New tools page
+
+3. Add Settings Export/Import
+   - JSON-based configuration export
+   - Easy site migration
+   - Settings backup and restore
+   - Files: New import/export functions
+
+## Documentation
+
+- GITHUB_ISSUES_GUIDE.md: Complete guide for creating issues
+  - Quick start instructions
+  - Three methods for issue creation (manual, CLI, script)
+  - Label recommendations
+  - Implementation timeline
+  - Estimated hours per issue
+
+## Issue Template Features
+
+Each template includes:
+- Detailed description with context
+- Current implementation analysis
+- Complete code examples
+- Files to modify
+- Testing requirements
+- Benefits and impact
+- Priority justification
+- Co-authorship attribution
+
+## Usage
+
+1. Review the guide: .github/GITHUB_ISSUES_GUIDE.md
+2. Choose creation method (manual, CLI, or script)
+3. Create issues in recommended order (Priority 1 first)
+4. Use provided labels for organization
+5. Follow implementation guidance in templates
+
+## Time Estimates
+
+- Priority 1: 6-9 hours + testing
+- Priority 2: 10-14 hours + testing
+- Priority 3: 15-21 hours + testing
+- Total: 38-55 hours (5-7 weeks part-time)
+
+## Files Added
+
+- .github/GITHUB_ISSUES_GUIDE.md
+- .github/ISSUE_TEMPLATES/priority-1-security.md
+- .github/ISSUE_TEMPLATES/priority-2-code-quality.md
+- .github/ISSUE_TEMPLATES/priority-3-features.md
+
+Co-authored-by: Claude <code@claude.ai>
+Co-authored-by: Ojārs Kapteinis <ojars@kapteinis.lv>
+---
+ .github/GITHUB_ISSUES_GUIDE.md                | 228 +++++
+ .../ISSUE_TEMPLATES/priority-1-security.md    | 192 ++++
+ .../priority-2-code-quality.md                | 492 ++++++++++
+ .../ISSUE_TEMPLATES/priority-3-features.md    | 844 ++++++++++++++++++
+ 4 files changed, 1756 insertions(+)
+ create mode 100644 .github/GITHUB_ISSUES_GUIDE.md
+ create mode 100644 .github/ISSUE_TEMPLATES/priority-1-security.md
+ create mode 100644 .github/ISSUE_TEMPLATES/priority-2-code-quality.md
+ create mode 100644 .github/ISSUE_TEMPLATES/priority-3-features.md
+
+diff --git a/.github/GITHUB_ISSUES_GUIDE.md b/.github/GITHUB_ISSUES_GUIDE.md
+new file mode 100644
+index 0000000..0a59646
+--- /dev/null
++++ b/.github/GITHUB_ISSUES_GUIDE.md
+@@ -0,0 +1,228 @@
++# GitHub Issues Creation Guide
++
++This guide helps you create GitHub issues from the templates provided for the Flamingo plugin improvements.
++
++## Quick Start
++
++The issue templates are organized by priority in the `.github/ISSUE_TEMPLATES/` directory:
++
++1. **priority-1-security.md** - Critical security enhancements (2 issues)
++2. **priority-2-code-quality.md** - Performance and code quality (3 issues)
++3. **priority-3-features.md** - Feature enhancements (3 issues)
++
++## Creating Issues
++
++### Method 1: Manual Creation from Templates
++
++1. Go to your GitHub repository
++2. Click "Issues" → "New Issue"
++3. Open the template file for the priority level
++4. Copy the content from each issue section
++5. Paste into GitHub issue form
++6. Add the appropriate labels
++7. Assign to team members if desired
++
++### Method 2: GitHub CLI (Recommended)
++
++If you have [GitHub CLI](https://cli.github.com/) installed:
++
++```bash
++# Navigate to repository
++cd /path/to/flamingo
++
++# Create Priority 1 issues
++gh issue create --title "Enhance CSV Formula Injection Protection" \
++  --label "security,priority-1,enhancement" \
++  --body-file .github/ISSUE_TEMPLATES/priority-1-security.md
++
++# Repeat for each issue...
++```
++
++### Method 3: Bulk Creation Script
++
++Create a script to automate issue creation:
++
++```bash
++#!/bin/bash
++
++# Priority 1: Security Enhancements
++gh issue create --title "Enhance CSV Formula Injection Protection" \
++  --label "security,priority-1,enhancement" \
++  --body "See .github/ISSUE_TEMPLATES/priority-1-security.md - Issue 1"
++
++gh issue create --title "Add Comprehensive Input Validation for Contact and Message Data" \
++  --label "security,priority-1,enhancement" \
++  --body "See .github/ISSUE_TEMPLATES/priority-1-security.md - Issue 2"
++
++# Priority 2: Code Quality
++gh issue create --title "Optimize CSV Export for Large Datasets with Batched Processing" \
++  --label "performance,priority-2,enhancement" \
++  --body "See .github/ISSUE_TEMPLATES/priority-2-code-quality.md - Issue 1"
++
++gh issue create --title "Fix N+1 Query Problem in Contact List Table History Column" \
++  --label "performance,priority-2,bug" \
++  --body "See .github/ISSUE_TEMPLATES/priority-2-code-quality.md - Issue 2"
++
++gh issue create --title "Add Transient Caching for Frequently Accessed Taxonomy Terms" \
++  --label "performance,priority-2,enhancement" \
++  --body "See .github/ISSUE_TEMPLATES/priority-2-code-quality.md - Issue 3"
++
++# Priority 3: Features
++gh issue create --title "Implement Configurable Debug Logging for Troubleshooting" \
++  --label "enhancement,priority-3,developer-experience" \
++  --body "See .github/ISSUE_TEMPLATES/priority-3-features.md - Issue 1"
++
++gh issue create --title "Add Database Cleanup and Data Integrity Verification Tools" \
++  --label "enhancement,priority-3,maintenance" \
++  --body "See .github/ISSUE_TEMPLATES/priority-3-features.md - Issue 2"
++
++gh issue create --title "Add Settings Export/Import for Easy Site Migration" \
++  --label "enhancement,priority-3,usability" \
++  --body "See .github/ISSUE_TEMPLATES/priority-3-features.md - Issue 3"
++```
++
++Save as `.github/create-issues.sh`, make executable, and run:
++
++```bash
++chmod +x .github/create-issues.sh
++./.github/create-issues.sh
++```
++
++## Issue Summary
++
++### Priority 1: Security (2 issues)
++
++**CRITICAL - Address First**
++
++1. **Enhance CSV Formula Injection Protection**
++   - Improve CSV export security
++   - Use industry-standard mitigation
++   - Files: `includes/csv.php`
++
++2. **Add Comprehensive Input Validation**
++   - Validation layer before sanitization
++   - Email format validation
++   - Field length limits
++   - Files: Multiple
++
++### Priority 2: Code Quality (3 issues)
++
++**HIGH - Improves Performance and Maintainability**
++
++1. **Optimize CSV Export for Large Datasets**
++   - Batch processing for exports
++   - Prevents memory exhaustion
++   - Files: `includes/csv.php`
++
++2. **Fix N+1 Query Problem in Contact History**
++   - Optimize database queries
++   - Single query instead of loop
++   - Files: `admin/includes/class-contacts-list-table.php`
++
++3. **Add Transient Caching for Taxonomy Terms**
++   - Cache frequently accessed terms
++   - Reduce database load
++   - Files: Multiple
++
++### Priority 3: Features (3 issues)
++
++**MEDIUM - Enhances User Experience**
++
++1. **Implement Configurable Debug Logging**
++   - Admin logging interface
++   - Troubleshooting tools
++   - Files: New + multiple
++
++2. **Add Database Cleanup Tools**
++   - Orphaned data cleanup
++   - Data integrity checks
++   - Files: New admin tools page
++
++3. **Add Settings Export/Import**
++   - Easy site migration
++   - Configuration backup
++   - Files: New import/export functions
++
++## Labels to Use
++
++Create these labels in your repository:
++
++- `security` - Security-related issues
++- `performance` - Performance improvements
++- `enhancement` - New features or improvements
++- `bug` - Something isn't working
++- `priority-1` - Critical priority
++- `priority-2` - High priority
++- `priority-3` - Medium priority
++- `developer-experience` - Improves developer workflow
++- `maintenance` - Maintenance and cleanup
++- `usability` - User experience improvements
++
++## Issue Organization
++
++### Milestones
++
++Consider creating milestones:
++
++- **Milestone 1: Security Hardening** - Priority 1 issues
++- **Milestone 2: Performance Optimization** - Priority 2 issues
++- **Milestone 3: Feature Enhancements** - Priority 3 issues
++
++### Project Board
++
++Create a project board with columns:
++
++- **Backlog** - All issues start here
++- **To Do** - Ready to be worked on
++- **In Progress** - Currently being developed
++- **In Review** - Awaiting code review
++- **Done** - Completed and merged
++
++## Implementation Order
++
++Recommended implementation sequence:
++
++1. **Week 1-2:** Priority 1 Security Enhancements
++   - Issue #1: CSV Formula Injection Protection (2-3 hours)
++   - Issue #2: Input Validation Layer (4-6 hours)
++   - Testing and security review (2-3 hours)
++
++2. **Week 3-4:** Priority 2 Code Quality
++   - Issue #1: CSV Export Optimization (4-6 hours)
++   - Issue #2: N+1 Query Fix (3-4 hours)
++   - Issue #3: Transient Caching (3-4 hours)
++   - Performance testing (2-3 hours)
++
++3. **Week 5-6:** Priority 3 Features
++   - Issue #1: Debug Logging (6-8 hours)
++   - Issue #2: Cleanup Tools (5-7 hours)
++   - Issue #3: Export/Import (4-6 hours)
++   - Documentation and testing (3-4 hours)
++
++**Total Estimated Time:** 38-55 hours (5-7 weeks part-time)
++
++## Additional Resources
++
++- [Security Audit Report](../claude.md) - Full audit findings
++- [Test Suite](../tests/README.md) - Testing documentation
++- [WordPress Coding Standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/)
++- [Plugin Security Best Practices](https://developer.wordpress.org/plugins/security/)
++
++## Notes
++
++- All issues include code examples and implementation guidance
++- Each issue specifies files to modify
++- Testing requirements are included
++- Co-authorship is acknowledged in each template
++
++## Co-Authors
++
++These issue templates were created by:
++- Claude (code@claude.ai)
++- Ojārs Kapteinis (ojars@kapteinis.lv)
++
++---
++
++**Questions or Issues?**
++
++If you need clarification on any issue template or implementation guidance, please refer to the full audit report in `claude.md` or create a discussion in the repository.
+diff --git a/.github/ISSUE_TEMPLATES/priority-1-security.md b/.github/ISSUE_TEMPLATES/priority-1-security.md
+new file mode 100644
+index 0000000..cbb61b0
+--- /dev/null
++++ b/.github/ISSUE_TEMPLATES/priority-1-security.md
+@@ -0,0 +1,192 @@
++# Priority 1: Security Enhancements
++
++## Issues to Create
++
++### Issue 1: Enhanced CSV Formula Injection Protection
++
++**Title:** Enhance CSV Formula Injection Protection
++
++**Labels:** `security`, `priority-1`, `enhancement`
++
++**Description:**
++```markdown
++## Summary
++Improve the CSV export formula injection protection to use standard mitigation techniques instead of warning messages.
++
++## Current Implementation
++The plugin currently detects formula triggers (`=`, `+`, `-`, `@`) and adds a warning message prefix. While this alerts users, it may not prevent exploitation in all spreadsheet applications.
++
++## Proposed Solution
++Prepend a single quote (`'`) to cells starting with formula triggers, which is the industry-standard mitigation:
++
++```php
++function flamingo_csv_field_prefix_text( $prefix, $input ) {
++    $formula_triggers = array( '=', '+', '-', '@' );
++
++    if ( in_array( substr( $input, 0, 1 ), $formula_triggers, true ) ) {
++        $prefix = "'";  // Prevents formula execution in spreadsheet apps
++    }
++
++    return $prefix;
++}
++```
++
++## Benefits
++- Industry-standard protection
++- Prevents formula execution in Excel, LibreOffice, Google Sheets
++- Simpler implementation
++- Better user experience (no warning text clutter)
++
++## Files to Modify
++- `includes/csv.php` (lines 225-243)
++
++## References
++- [OWASP CSV Injection](https://owasp.org/www-community/attacks/CSV_Injection)
++- [Security Audit Report](./claude.md)
++
++## Priority
++**Priority 1 - Security Enhancement**
++
++## Assignee
++@okapteinis
++
++## Co-Authors
++- Claude (code@claude.ai)
++- Ojārs Kapteinis (ojars@kapteinis.lv)
++```
++
++---
++
++### Issue 2: Implement Additional Input Validation
++
++**Title:** Add Comprehensive Input Validation for Contact and Message Data
++
++**Labels:** `security`, `priority-1`, `enhancement`
++
++**Description:**
++```markdown
++## Summary
++Implement comprehensive input validation layer before data sanitization to ensure data type consistency and prevent edge cases.
++
++## Current State
++The plugin now sanitizes inputs but lacks comprehensive validation for:
++- Email address format validation
++- Field length limits
++- Data type validation
++- Required field checking
++
++## Proposed Implementation
++
++### 1. Contact Validation Function
++```php
++/**
++ * Validates contact data before saving.
++ *
++ * @param array $data Contact data to validate.
++ * @return WP_Error|true True if valid, WP_Error if invalid.
++ */
++function flamingo_validate_contact_data( $data ) {
++    $errors = new WP_Error();
++
++    // Email validation
++    if ( empty( $data['email'] ) || ! is_email( $data['email'] ) ) {
++        $errors->add( 'invalid_email', __( 'Invalid email address.', 'flamingo' ) );
++    }
++
++    // Email length check
++    if ( strlen( $data['email'] ) > 254 ) {
++        $errors->add( 'email_too_long', __( 'Email address too long.', 'flamingo' ) );
++    }
++
++    // Name length check
++    if ( ! empty( $data['name'] ) && strlen( $data['name'] ) > 200 ) {
++        $errors->add( 'name_too_long', __( 'Name too long (max 200 characters).', 'flamingo' ) );
++    }
++
++    // Validate props array
++    if ( isset( $data['props'] ) && ! is_array( $data['props'] ) ) {
++        $errors->add( 'invalid_props', __( 'Contact properties must be an array.', 'flamingo' ) );
++    }
++
++    return $errors->has_errors() ? $errors : true;
++}
++```
++
++### 2. Message Validation Function
++```php
++/**
++ * Validates inbound message data before saving.
++ *
++ * @param array $data Message data to validate.
++ * @return WP_Error|true True if valid, WP_Error if invalid.
++ */
++function flamingo_validate_message_data( $data ) {
++    $errors = new WP_Error();
++
++    // Subject length check
++    if ( ! empty( $data['subject'] ) && strlen( $data['subject'] ) > 255 ) {
++        $errors->add( 'subject_too_long', __( 'Subject too long (max 255 characters).', 'flamingo' ) );
++    }
++
++    // From email validation
++    if ( ! empty( $data['from_email'] ) && ! is_email( $data['from_email'] ) ) {
++        $errors->add( 'invalid_from_email', __( 'Invalid sender email address.', 'flamingo' ) );
++    }
++
++    // Fields validation
++    if ( isset( $data['fields'] ) && ! is_array( $data['fields'] ) ) {
++        $errors->add( 'invalid_fields', __( 'Message fields must be an array.', 'flamingo' ) );
++    }
++
++    return $errors->has_errors() ? $errors : true;
++}
++```
++
++### 3. Integration Points
++
++**In `admin/admin.php` (contact save):**
++```php
++// After check_admin_referer, before sanitization
++$validation = flamingo_validate_contact_data( $_POST['contact'] );
++if ( is_wp_error( $validation ) ) {
++    wp_die( $validation->get_error_message() );
++}
++```
++
++**In `Flamingo_Contact::add()`:**
++```php
++$validation = flamingo_validate_contact_data( $args );
++if ( is_wp_error( $validation ) ) {
++    error_log( 'Flamingo: Invalid contact data - ' . $validation->get_error_message() );
++    return null;
++}
++```
++
++## Benefits
++- Prevents invalid data from entering the system
++- Improves data quality
++- Provides clear error messages to users
++- Prevents edge cases and unexpected behavior
++- Complements existing sanitization
++
++## Files to Modify
++- `includes/functions.php` (add validation functions)
++- `admin/admin.php` (integrate validation)
++- `includes/class-contact.php` (integrate validation)
++- `includes/class-inbound-message.php` (integrate validation)
++
++## Testing Requirements
++- Unit tests for validation functions
++- Integration tests for admin save flow
++- Edge case testing (empty strings, null values, extremely long strings)
++
++## Priority
++**Priority 1 - Security Enhancement**
++
++## Related Issues
++- Complements existing input sanitization from commit 36fe947
++
++## Co-Authors
++- Claude (code@claude.ai)
++- Ojārs Kapteinis (ojars@kapteinis.lv)
++```
+diff --git a/.github/ISSUE_TEMPLATES/priority-2-code-quality.md b/.github/ISSUE_TEMPLATES/priority-2-code-quality.md
+new file mode 100644
+index 0000000..b7e37b6
+--- /dev/null
++++ b/.github/ISSUE_TEMPLATES/priority-2-code-quality.md
+@@ -0,0 +1,492 @@
++# Priority 2: Code Quality Improvements
++
++## Issues to Create
++
++### Issue 1: Implement Batched CSV Export Processing
++
++**Title:** Optimize CSV Export for Large Datasets with Batched Processing
++
++**Labels:** `performance`, `priority-2`, `enhancement`
++
++**Description:**
++```markdown
++## Summary
++Implement batched processing and streaming output for CSV exports to prevent memory exhaustion and timeouts on sites with large contact/message databases.
++
++## Current Issue
++CSV export currently retrieves all records at once using `'posts_per_page' => -1`, which can cause:
++- PHP memory exhaustion on large datasets (>10,000 records)
++- Script timeouts
++- Poor user experience
++
++**Location:** `includes/csv.php` lines 46-90 (Contact CSV) and 106-180 (Inbound CSV)
++
++## Proposed Solution
++
++### 1. Batched Contact CSV Export
++```php
++public function print_data() {
++    $labels = array(
++        __( 'Email', 'flamingo' ),
++        __( 'Full name', 'flamingo' ),
++        __( 'First name', 'flamingo' ),
++        __( 'Last name', 'flamingo' ),
++    );
++
++    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
++    echo flamingo_csv_row( $labels );
++
++    $batch_size = 100;
++    $offset = 0;
++    $has_more = true;
++
++    while ( $has_more ) {
++        $args = array(
++            'posts_per_page' => $batch_size,
++            'offset' => $offset,
++            'orderby' => 'meta_value',
++            'order' => 'ASC',
++            'meta_key' => '_email',
++        );
++
++        // Apply filters from GET parameters
++        if ( ! empty( $_GET['s'] ) ) {
++            $args['s'] = $_GET['s'];
++        }
++
++        if ( ! empty( $_GET['orderby'] ) ) {
++            if ( 'email' === $_GET['orderby'] ) {
++                $args['meta_key'] = '_email';
++            } elseif ( 'name' === $_GET['orderby'] ) {
++                $args['meta_key'] = '_name';
++            }
++        }
++
++        if (
++            ! empty( $_GET['order'] ) and
++            'asc' === strtolower( $_GET['order'] )
++        ) {
++            $args['order'] = 'ASC';
++        }
++
++        if ( ! empty( $_GET['contact_tag_id'] ) ) {
++            $args['contact_tag_id'] = explode( ',', $_GET['contact_tag_id'] );
++        }
++
++        $items = Flamingo_Contact::find( $args );
++
++        if ( empty( $items ) || count( $items ) < $batch_size ) {
++            $has_more = false;
++        }
++
++        foreach ( $items as $item ) {
++            echo "\r\n";
++
++            $row = array(
++                $item->email,
++                $item->get_prop( 'name' ),
++                $item->get_prop( 'first_name' ),
++                $item->get_prop( 'last_name' ),
++            );
++
++            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
++            echo flamingo_csv_row( $row );
++
++            // Flush output buffer to send data immediately
++            if ( ob_get_level() > 0 ) {
++                ob_flush();
++            }
++            flush();
++        }
++
++        $offset += $batch_size;
++
++        // Prevent infinite loops
++        if ( $offset > 100000 ) {
++            break;
++        }
++    }
++}
++```
++
++### 2. Similar Implementation for Inbound CSV Export
++
++Apply the same batching logic to `Flamingo_Inbound_CSV::print_data()`.
++
++### 3. Add Progress Feedback
++
++For very large exports, consider adding a progress indicator or download link:
++
++```php
++// In admin/admin.php, before starting export
++if ( Flamingo_Contact::count() > 1000 ) {
++    wp_admin_notice(
++        __( 'Large export detected. This may take a few moments...', 'flamingo' ),
++        array( 'type' => 'info' )
++    );
++}
++```
++
++## Benefits
++- Handles datasets of 100,000+ records
++- Prevents PHP memory exhaustion
++- Prevents script timeouts
++- Streams data to browser (user sees progress)
++- Better server resource utilization
++
++## Testing Requirements
++- Test with 100 contacts/messages
++- Test with 1,000 contacts/messages
++- Test with 10,000+ contacts/messages
++- Monitor memory usage during export
++- Test with various filter combinations
++
++## Files to Modify
++- `includes/csv.php` (Flamingo_Contact_CSV and Flamingo_Inbound_CSV classes)
++- Consider adding progress UI in admin pages
++
++## Priority
++**Priority 2 - Performance Enhancement**
++
++## Related Issues
++- Performance optimization identified in security audit
++
++## Co-Authors
++- Claude (code@claude.ai)
++- Ojārs Kapteinis (ojars@kapteinis.lv)
++```
++
++---
++
++### Issue 2: Optimize Database Queries in Contact History
++
++**Title:** Fix N+1 Query Problem in Contact List Table History Column
++
++**Labels:** `performance`, `priority-2`, `bug`
++
++**Description:**
++```markdown
++## Summary
++Fix N+1 query problem in contact list table that causes performance issues when displaying contact history.
++
++## Current Issue
++In `admin/includes/class-contacts-list-table.php`, the `column_history()` method executes a separate query for each contact channel to count messages:
++
++**Location:** Lines 288-293
++```php
++foreach ( (array) $terms as $term ) {
++    Flamingo_Inbound_Message::find( array(
++        'channel' => $term->slug,
++        's' => $item->email,
++    ) );
++
++    $count = (int) Flamingo_Inbound_Message::count();
++    // ...
++}
++```
++
++If there are 5 channels and 20 contacts displayed, this executes 100 additional queries!
++
++## Proposed Solution
++
++### 1. Cache Channel Counts
++```php
++protected function column_history( $item ) {
++    static $channel_counts_cache = array();
++    $cache_key = 'contact_' . $item->id();
++
++    if ( ! isset( $channel_counts_cache[$cache_key] ) ) {
++        $history = array();
++
++        // User
++        if ( $user = get_user_by( 'email', $item->email ) ) {
++            $link = sprintf( 'user-edit.php?user_id=%d', $user->ID );
++
++            $history[] = sprintf(
++                '<a href="%2$s">%1$s</a>',
++                esc_html( __( 'User', 'flamingo' ) ),
++                admin_url( $link )
++            );
++        }
++
++        // Comment (already optimized)
++        $comment_count = (int) get_comments( array(
++            'count' => true,
++            'author_email' => $item->email,
++            'status' => 'approve',
++            'type' => 'comment',
++        ) );
++
++        if ( 0 < $comment_count ) {
++            $link = sprintf( 'edit-comments.php?s=%s', urlencode( $item->email ) );
++
++            $history[] = sprintf(
++                '<a href="%2$s">%1$s</a>',
++                esc_html( sprintf(
++                    __( 'Comment (%d)', 'flamingo' ),
++                    $comment_count
++                ) ),
++                admin_url( $link )
++            );
++        }
++
++        // Contact channels - use a single query
++        global $wpdb;
++
++        $channel_counts = $wpdb->get_results( $wpdb->prepare(
++            "SELECT t.slug, t.name, COUNT(p.ID) as count
++            FROM {$wpdb->term_taxonomy} tt
++            INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
++            INNER JOIN {$wpdb->term_relationships} tr ON tt.term_taxonomy_id = tr.term_taxonomy_id
++            INNER JOIN {$wpdb->posts} p ON tr.object_id = p.ID
++            INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
++            WHERE tt.taxonomy = %s
++            AND pm.meta_key = '_from_email'
++            AND pm.meta_value = %s
++            AND p.post_status != 'trash'
++            GROUP BY t.slug, t.name",
++            Flamingo_Inbound_Message::channel_taxonomy,
++            $item->email
++        ) );
++
++        foreach ( $channel_counts as $channel ) {
++            if ( $channel->count > 0 ) {
++                $link = add_query_arg( array(
++                    'channel' => $channel->slug,
++                    's' => $item->email,
++                ), menu_page_url( 'flamingo_inbound', false ) );
++
++                $history[] = sprintf(
++                    '<a href="%2$s">%1$s</a>',
++                    esc_html( sprintf(
++                        _x( '%1$s (%2$d)', 'contact history', 'flamingo' ),
++                        $channel->name,
++                        $channel->count
++                    ) ),
++                    esc_url( $link )
++                );
++            }
++        }
++
++        $channel_counts_cache[$cache_key] = $history;
++    }
++
++    $history = $channel_counts_cache[$cache_key];
++
++    $output = '';
++
++    foreach ( $history as $item ) {
++        $output .= sprintf( '<li>%s</li>', $item );
++    }
++
++    return sprintf( '<ul class="contact-history">%s</ul>', $output );
++}
++```
++
++### 2. Add Object Caching
++
++For even better performance with persistent object cache:
++
++```php
++$cache_key = 'flamingo_contact_history_' . $item->id();
++$history = wp_cache_get( $cache_key, 'flamingo' );
++
++if ( false === $history ) {
++    // Build history array
++    // ...
++
++    wp_cache_set( $cache_key, $history, 'flamingo', HOUR_IN_SECONDS );
++}
++```
++
++## Benefits
++- Reduces queries from O(n*m) to O(n) where n=contacts, m=channels
++- Dramatically improves page load time with many contacts
++- Reduces database load
++- Improves user experience
++
++## Performance Impact
++- **Before:** 20 contacts × 5 channels = 100 extra queries
++- **After:** 1 query per page load (or cached)
++
++## Files to Modify
++- `admin/includes/class-contacts-list-table.php` (lines 246-325)
++
++## Testing Requirements
++- Test with 0 messages per contact
++- Test with 100+ messages per contact
++- Test with multiple channels
++- Monitor query count before/after (use Query Monitor plugin)
++- Test with WordPress object cache enabled
++
++## Priority
++**Priority 2 - Performance Bug Fix**
++
++## Co-Authors
++- Claude (code@claude.ai)
++- Ojārs Kapteinis (ojars@kapteinis.lv)
++```
++
++---
++
++### Issue 3: Implement Transient Caching for Taxonomy Terms
++
++**Title:** Add Transient Caching for Frequently Accessed Taxonomy Terms
++
++**Labels:** `performance`, `priority-2`, `enhancement`
++
++**Description:**
++```markdown
++## Summary
++Implement transient caching for taxonomy terms that don't change frequently to reduce database queries.
++
++## Rationale
++Taxonomy terms (contact tags, message channels) are queried frequently but rarely change. Caching them reduces unnecessary database load.
++
++## Implementation
++
++### 1. Contact Tags Caching
++```php
++/**
++ * Gets contact tags with caching.
++ *
++ * @param array $args Optional. Arguments to pass to get_terms().
++ * @return array|WP_Error Array of term objects or WP_Error on failure.
++ */
++function flamingo_get_contact_tags( $args = array() ) {
++    $cache_key = 'flamingo_contact_tags_' . md5( serialize( $args ) );
++    $tags = get_transient( $cache_key );
++
++    if ( false === $tags ) {
++        $tags = get_terms( array_merge(
++            array( 'taxonomy' => Flamingo_Contact::contact_tag_taxonomy ),
++            $args
++        ) );
++
++        if ( ! is_wp_error( $tags ) ) {
++            set_transient( $cache_key, $tags, HOUR_IN_SECONDS );
++        }
++    }
++
++    return $tags;
++}
++```
++
++### 2. Message Channels Caching
++```php
++/**
++ * Gets message channels with caching.
++ *
++ * @param array $args Optional. Arguments to pass to get_terms().
++ * @return array|WP_Error Array of term objects or WP_Error on failure.
++ */
++function flamingo_get_channels( $args = array() ) {
++    $cache_key = 'flamingo_channels_' . md5( serialize( $args ) );
++    $channels = get_transient( $cache_key );
++
++    if ( false === $channels ) {
++        $channels = get_terms( array_merge(
++            array( 'taxonomy' => Flamingo_Inbound_Message::channel_taxonomy ),
++            $args
++        ) );
++
++        if ( ! is_wp_error( $channels ) ) {
++            set_transient( $cache_key, $channels, HOUR_IN_SECONDS );
++        }
++    }
++
++    return $channels;
++}
++```
++
++### 3. Cache Invalidation
++```php
++/**
++ * Clears taxonomy term caches.
++ *
++ * @param int $term_id Term ID.
++ * @param int $tt_id Term taxonomy ID.
++ * @param string $taxonomy Taxonomy slug.
++ */
++function flamingo_clear_taxonomy_cache( $term_id, $tt_id, $taxonomy ) {
++    if ( in_array( $taxonomy, array(
++        Flamingo_Contact::contact_tag_taxonomy,
++        Flamingo_Inbound_Message::channel_taxonomy,
++    ), true ) ) {
++        // Clear all related transients
++        global $wpdb;
++
++        $pattern = $wpdb->esc_like( '_transient_flamingo_' ) . '%';
++
++        $wpdb->query( $wpdb->prepare(
++            "DELETE FROM {$wpdb->options}
++            WHERE option_name LIKE %s",
++            $pattern
++        ) );
++    }
++}
++
++add_action( 'created_term', 'flamingo_clear_taxonomy_cache', 10, 3 );
++add_action( 'edited_term', 'flamingo_clear_taxonomy_cache', 10, 3 );
++add_action( 'delete_term', 'flamingo_clear_taxonomy_cache', 10, 3 );
++```
++
++### 4. Update Existing Code
++
++Replace direct `get_terms()` calls with cached functions:
++
++**In `admin/includes/meta-boxes.php`:**
++```php
++// Before
++$most_used_tags = get_terms( array(
++    'taxonomy' => Flamingo_Contact::contact_tag_taxonomy,
++    // ...
++) );
++
++// After
++$most_used_tags = flamingo_get_contact_tags( array(
++    'orderby' => 'count',
++    'order' => 'DESC',
++    'number' => 10,
++    'exclude' => $tag_ids,
++    'fields' => 'names',
++) );
++```
++
++**In list tables:**
++```php
++// Before
++$terms = get_terms( array(
++    'taxonomy' => Flamingo_Inbound_Message::channel_taxonomy,
++) );
++
++// After
++$terms = flamingo_get_channels();
++```
++
++## Benefits
++- Reduces database queries on every page load
++- Improves admin page response time
++- Works with WordPress object cache if available
++- Automatic cache invalidation when terms change
++
++## Files to Modify
++- `includes/functions.php` (add cache functions)
++- `admin/includes/meta-boxes.php` (use cached functions)
++- `admin/includes/class-contacts-list-table.php` (use cached functions)
++- `admin/includes/class-inbound-messages-list-table.php` (use cached functions)
++
++## Testing Requirements
++- Test that cached terms are used
++- Test cache invalidation on term create/update/delete
++- Monitor query count reduction
++- Test with WordPress object cache enabled
++- Test transient expiration (wait 1 hour)
++
++## Priority
++**Priority 2 - Performance Enhancement**
++
++## Co-Authors
++- Claude (code@claude.ai)
++- Ojārs Kapteinis (ojars@kapteinis.lv)
++```
+diff --git a/.github/ISSUE_TEMPLATES/priority-3-features.md b/.github/ISSUE_TEMPLATES/priority-3-features.md
+new file mode 100644
+index 0000000..1452abd
+--- /dev/null
++++ b/.github/ISSUE_TEMPLATES/priority-3-features.md
+@@ -0,0 +1,844 @@
++# Priority 3: Feature Enhancements
++
++## Issues to Create
++
++### Issue 1: Enhanced Debug Logging System
++
++**Title:** Implement Configurable Debug Logging for Troubleshooting
++
++**Labels:** `enhancement`, `priority-3`, `developer-experience`
++
++**Description:**
++```markdown
++## Summary
++Add a comprehensive, configurable debug logging system to help users and developers troubleshoot issues with the Flamingo plugin.
++
++## Rationale
++Currently, errors are logged using `error_log()`, but there's no way to:
++- Enable/disable debug logging from admin
++- View logs within WordPress admin
++- Log different severity levels
++- Track plugin operations for debugging
++
++## Proposed Implementation
++
++### 1. Settings Page with Debug Option
++
++Add a settings page under Flamingo menu:
++
++```php
++// In admin/admin.php
++function flamingo_settings_page() {
++    add_submenu_page(
++        'flamingo',
++        __( 'Settings', 'flamingo' ),
++        __( 'Settings', 'flamingo' ),
++        'manage_options',
++        'flamingo-settings',
++        'flamingo_settings_page_content'
++    );
++}
++add_action( 'admin_menu', 'flamingo_settings_page', 9 );
++
++function flamingo_settings_page_content() {
++    ?>
++    <div class="wrap">
++        <h1><?php echo esc_html( __( 'Flamingo Settings', 'flamingo' ) ); ?></h1>
++
++        <form method="post" action="options.php">
++            <?php
++            settings_fields( 'flamingo_settings' );
++            do_settings_sections( 'flamingo_settings' );
++            submit_button();
++            ?>
++        </form>
++    </div>
++    <?php
++}
++```
++
++### 2. Debug Logging Functions
++
++```php
++/**
++ * Logs a debug message if debug mode is enabled.
++ *
++ * @param string $message The message to log.
++ * @param string $level   Log level: 'error', 'warning', 'info', 'debug'.
++ * @param array  $context Optional context data.
++ */
++function flamingo_log( $message, $level = 'info', $context = array() ) {
++    if ( ! get_option( 'flamingo_debug_enabled', false ) ) {
++        return;
++    }
++
++    $log_entry = array(
++        'timestamp' => current_time( 'mysql' ),
++        'level' => $level,
++        'message' => $message,
++        'context' => $context,
++    );
++
++    // Log to WordPress debug.log if WP_DEBUG is enabled
++    if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
++        error_log( sprintf(
++            '[Flamingo %s] %s',
++            strtoupper( $level ),
++            $message
++        ) );
++
++        if ( ! empty( $context ) ) {
++            error_log( '[Flamingo Context] ' . wp_json_encode( $context ) );
++        }
++    }
++
++    // Also store in database for viewing in admin
++    $max_logs = 100; // Keep only last 100 log entries
++    $logs = get_option( 'flamingo_debug_logs', array() );
++
++    array_unshift( $logs, $log_entry );
++
++    if ( count( $logs ) > $max_logs ) {
++        $logs = array_slice( $logs, 0, $max_logs );
++    }
++
++    update_option( 'flamingo_debug_logs', $logs, false );
++}
++
++/**
++ * Convenience functions for different log levels.
++ */
++function flamingo_log_error( $message, $context = array() ) {
++    flamingo_log( $message, 'error', $context );
++}
++
++function flamingo_log_warning( $message, $context = array() ) {
++    flamingo_log( $message, 'warning', $context );
++}
++
++function flamingo_log_info( $message, $context = array() ) {
++    flamingo_log( $message, 'info', $context );
++}
++
++function flamingo_log_debug( $message, $context = array() ) {
++    flamingo_log( $message, 'debug', $context );
++}
++```
++
++### 3. Log Viewer Page
++
++Add a log viewer in the admin:
++
++```php
++function flamingo_logs_page() {
++    if ( ! current_user_can( 'manage_options' ) ) {
++        wp_die( __( 'You do not have permission to view logs.', 'flamingo' ) );
++    }
++
++    // Handle clear logs action
++    if ( isset( $_POST['clear_logs'] ) ) {
++        check_admin_referer( 'flamingo_clear_logs' );
++        delete_option( 'flamingo_debug_logs' );
++        wp_admin_notice(
++            __( 'Logs cleared successfully.', 'flamingo' ),
++            array( 'type' => 'success' )
++        );
++    }
++
++    $logs = get_option( 'flamingo_debug_logs', array() );
++
++    ?>
++    <div class="wrap">
++        <h1><?php echo esc_html( __( 'Flamingo Debug Logs', 'flamingo' ) ); ?></h1>
++
++        <?php if ( ! get_option( 'flamingo_debug_enabled', false ) ) : ?>
++            <div class="notice notice-info">
++                <p><?php
++                    printf(
++                        __( 'Debug logging is currently disabled. <a href="%s">Enable it in settings</a>.', 'flamingo' ),
++                        admin_url( 'admin.php?page=flamingo-settings' )
++                    );
++                ?></p>
++            </div>
++        <?php endif; ?>
++
++        <form method="post">
++            <?php wp_nonce_field( 'flamingo_clear_logs' ); ?>
++            <?php submit_button( __( 'Clear Logs', 'flamingo' ), 'secondary', 'clear_logs', false ); ?>
++        </form>
++
++        <table class="wp-list-table widefat fixed striped">
++            <thead>
++                <tr>
++                    <th style="width: 150px;"><?php echo esc_html( __( 'Timestamp', 'flamingo' ) ); ?></th>
++                    <th style="width: 80px;"><?php echo esc_html( __( 'Level', 'flamingo' ) ); ?></th>
++                    <th><?php echo esc_html( __( 'Message', 'flamingo' ) ); ?></th>
++                </tr>
++            </thead>
++            <tbody>
++                <?php if ( empty( $logs ) ) : ?>
++                    <tr>
++                        <td colspan="3"><?php echo esc_html( __( 'No log entries found.', 'flamingo' ) ); ?></td>
++                    </tr>
++                <?php else : ?>
++                    <?php foreach ( $logs as $log ) : ?>
++                        <tr class="log-level-<?php echo esc_attr( $log['level'] ); ?>">
++                            <td><?php echo esc_html( $log['timestamp'] ); ?></td>
++                            <td>
++                                <span class="log-badge log-badge-<?php echo esc_attr( $log['level'] ); ?>">
++                                    <?php echo esc_html( strtoupper( $log['level'] ) ); ?>
++                                </span>
++                            </td>
++                            <td>
++                                <?php echo esc_html( $log['message'] ); ?>
++                                <?php if ( ! empty( $log['context'] ) ) : ?>
++                                    <details>
++                                        <summary><?php echo esc_html( __( 'Show context', 'flamingo' ) ); ?></summary>
++                                        <pre><?php echo esc_html( wp_json_encode( $log['context'], JSON_PRETTY_PRINT ) ); ?></pre>
++                                    </details>
++                                <?php endif; ?>
++                            </td>
++                        </tr>
++                    <?php endforeach; ?>
++                <?php endif; ?>
++            </tbody>
++        </table>
++    </div>
++
++    <style>
++        .log-badge {
++            display: inline-block;
++            padding: 2px 8px;
++            border-radius: 3px;
++            font-size: 11px;
++            font-weight: bold;
++        }
++        .log-badge-error { background: #dc3232; color: #fff; }
++        .log-badge-warning { background: #ffb900; color: #000; }
++        .log-badge-info { background: #00a0d2; color: #fff; }
++        .log-badge-debug { background: #888; color: #fff; }
++    </style>
++    <?php
++}
++```
++
++### 4. Update Existing Error Logging
++
++Replace existing `error_log()` calls with the new system:
++
++```php
++// In includes/class-contact.php
++// Before
++error_log( sprintf(
++    'Flamingo: Failed to save contact "%s" - %s',
++    $this->email,
++    $post_id->get_error_message()
++) );
++
++// After
++flamingo_log_error(
++    'Failed to save contact',
++    array(
++        'email' => $this->email,
++        'error' => $post_id->get_error_message(),
++    )
++);
++```
++
++### 5. Add Logging Throughout Plugin
++
++Add strategic logging points:
++
++```php
++// When contacts are imported
++flamingo_log_info( 'Contacts imported from users', array(
++    'count' => count( $users ),
++) );
++
++// When cron jobs run
++flamingo_log_debug( 'Cron job executed', array(
++    'job' => 'move_trash',
++    'moved' => count( $posts_to_move ),
++) );
++
++// When spam is detected
++flamingo_log_warning( 'Message marked as spam', array(
++    'message_id' => $this->id,
++    'reason' => $reason,
++) );
++```
++
++## Benefits
++- Easier troubleshooting for users and support
++- Track plugin operations without accessing server logs
++- Different log levels for different severity
++- In-admin log viewer (no FTP access needed)
++- Helps identify issues in production environments
++- Optional (can be disabled for performance)
++
++## Files to Modify
++- `includes/functions.php` (logging functions)
++- `admin/admin.php` (settings and logs pages)
++- `includes/class-contact.php` (add logging)
++- `includes/class-inbound-message.php` (add logging)
++- `includes/user.php` (add logging)
++- `includes/comment.php` (add logging)
++- `includes/cron.php` (add logging)
++
++## Configuration Options
++- Enable/disable debug logging
++- Log retention (number of entries to keep)
++- Minimum log level to record
++
++## Privacy Considerations
++- Don't log sensitive user data (passwords, tokens)
++- Obfuscate email addresses in logs if needed
++- Clear logs option for GDPR compliance
++
++## Priority
++**Priority 3 - Feature Enhancement**
++
++## Co-Authors
++- Claude (code@claude.ai)
++- Ojārs Kapteinis (ojars@kapteinis.lv)
++```
++
++---
++
++### Issue 2: Data Integrity and Cleanup Tools
++
++**Title:** Add Database Cleanup and Data Integrity Verification Tools
++
++**Labels:** `enhancement`, `priority-3`, `maintenance`
++
++**Description:**
++```markdown
++## Summary
++Implement administrative tools for database cleanup and data integrity verification to maintain plugin health over time.
++
++## Rationale
++Over time, plugins can accumulate:
++- Orphaned post meta (metadata for deleted posts)
++- Unused taxonomy terms
++- Duplicate entries
++- Invalid data
++
++A cleanup tool helps maintain database health and plugin performance.
++
++## Proposed Implementation
++
++### 1. Data Integrity Check Functions
++
++```php
++/**
++ * Checks for orphaned contact metadata.
++ *
++ * @return array Array of orphaned meta IDs.
++ */
++function flamingo_find_orphaned_contact_meta() {
++    global $wpdb;
++
++    $orphaned = $wpdb->get_col(
++        $wpdb->prepare(
++            "SELECT pm.meta_id
++            FROM {$wpdb->postmeta} pm
++            LEFT JOIN {$wpdb->posts} p ON pm.post_id = p.ID
++            WHERE p.ID IS NULL
++            AND pm.meta_key LIKE %s",
++            $wpdb->esc_like( '_' ) . '%'
++        )
++    );
++
++    return array_map( 'intval', $orphaned );
++}
++
++/**
++ * Checks for duplicate contacts (same email).
++ *
++ * @return array Array of duplicate contact groups.
++ */
++function flamingo_find_duplicate_contacts() {
++    global $wpdb;
++
++    $duplicates = $wpdb->get_results(
++        $wpdb->prepare(
++            "SELECT pm.meta_value as email, GROUP_CONCAT(pm.post_id) as post_ids, COUNT(*) as count
++            FROM {$wpdb->postmeta} pm
++            INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
++            WHERE pm.meta_key = '_email'
++            AND p.post_type = %s
++            AND p.post_status != 'trash'
++            GROUP BY pm.meta_value
++            HAVING COUNT(*) > 1",
++            Flamingo_Contact::post_type
++        )
++    );
++
++    return $duplicates;
++}
++
++/**
++ * Checks for empty contacts (no email).
++ *
++ * @return array Array of empty contact post IDs.
++ */
++function flamingo_find_empty_contacts() {
++    global $wpdb;
++
++    $empty = $wpdb->get_col(
++        $wpdb->prepare(
++            "SELECT p.ID
++            FROM {$wpdb->posts} p
++            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_email'
++            WHERE p.post_type = %s
++            AND p.post_status != 'trash'
++            AND (pm.meta_value IS NULL OR pm.meta_value = '')",
++            Flamingo_Contact::post_type
++        )
++    );
++
++    return array_map( 'intval', $empty );
++}
++
++/**
++ * Checks for unused taxonomy terms.
++ *
++ * @return array Array of unused term IDs.
++ */
++function flamingo_find_unused_terms() {
++    global $wpdb;
++
++    $unused = $wpdb->get_results(
++        $wpdb->prepare(
++            "SELECT t.term_id, t.name, tt.taxonomy, tt.count
++            FROM {$wpdb->terms} t
++            INNER JOIN {$wpdb->term_taxonomy} tt ON t.term_id = tt.term_id
++            WHERE tt.taxonomy IN (%s, %s)
++            AND tt.count = 0",
++            Flamingo_Contact::contact_tag_taxonomy,
++            Flamingo_Inbound_Message::channel_taxonomy
++        )
++    );
++
++    return $unused;
++}
++```
++
++### 2. Cleanup Admin Page
++
++```php
++function flamingo_tools_page() {
++    if ( ! current_user_can( 'manage_options' ) ) {
++        wp_die( __( 'You do not have permission to use these tools.', 'flamingo' ) );
++    }
++
++    // Handle cleanup actions
++    if ( isset( $_POST['action'] ) ) {
++        check_admin_referer( 'flamingo_tools' );
++
++        $action = $_POST['action'];
++        $result = array();
++
++        switch ( $action ) {
++            case 'clean_orphaned_meta':
++                $orphaned = flamingo_find_orphaned_contact_meta();
++                foreach ( $orphaned as $meta_id ) {
++                    delete_metadata_by_mid( 'post', $meta_id );
++                }
++                $result['message'] = sprintf(
++                    __( 'Cleaned %d orphaned metadata entries.', 'flamingo' ),
++                    count( $orphaned )
++                );
++                break;
++
++            case 'delete_empty_contacts':
++                $empty = flamingo_find_empty_contacts();
++                foreach ( $empty as $post_id ) {
++                    wp_delete_post( $post_id, true );
++                }
++                $result['message'] = sprintf(
++                    __( 'Deleted %d empty contacts.', 'flamingo' ),
++                    count( $empty )
++                );
++                break;
++
++            case 'clean_unused_terms':
++                $unused = flamingo_find_unused_terms();
++                foreach ( $unused as $term ) {
++                    wp_delete_term( $term->term_id, $term->taxonomy );
++                }
++                $result['message'] = sprintf(
++                    __( 'Deleted %d unused terms.', 'flamingo' ),
++                    count( $unused )
++                );
++                break;
++        }
++
++        if ( ! empty( $result['message'] ) ) {
++            wp_admin_notice( $result['message'], array( 'type' => 'success' ) );
++        }
++    }
++
++    // Display current status
++    $orphaned_count = count( flamingo_find_orphaned_contact_meta() );
++    $duplicate_count = count( flamingo_find_duplicate_contacts() );
++    $empty_count = count( flamingo_find_empty_contacts() );
++    $unused_terms_count = count( flamingo_find_unused_terms() );
++
++    ?>
++    <div class="wrap">
++        <h1><?php echo esc_html( __( 'Flamingo Tools', 'flamingo' ) ); ?></h1>
++
++        <div class="card">
++            <h2><?php echo esc_html( __( 'Database Status', 'flamingo' ) ); ?></h2>
++            <table class="form-table">
++                <tr>
++                    <th><?php echo esc_html( __( 'Orphaned Metadata', 'flamingo' ) ); ?></th>
++                    <td>
++                        <?php echo esc_html( number_format_i18n( $orphaned_count ) ); ?>
++                        <?php if ( $orphaned_count > 0 ) : ?>
++                            <form method="post" style="display:inline;">
++                                <?php wp_nonce_field( 'flamingo_tools' ); ?>
++                                <input type="hidden" name="action" value="clean_orphaned_meta" />
++                                <?php submit_button( __( 'Clean Up', 'flamingo' ), 'secondary small', 'submit', false ); ?>
++                            </form>
++                        <?php endif; ?>
++                    </td>
++                </tr>
++                <tr>
++                    <th><?php echo esc_html( __( 'Duplicate Contacts', 'flamingo' ) ); ?></th>
++                    <td>
++                        <?php echo esc_html( number_format_i18n( $duplicate_count ) ); ?>
++                        <?php if ( $duplicate_count > 0 ) : ?>
++                            <a href="#duplicates"><?php echo esc_html( __( 'Review', 'flamingo' ) ); ?></a>
++                        <?php endif; ?>
++                    </td>
++                </tr>
++                <tr>
++                    <th><?php echo esc_html( __( 'Empty Contacts', 'flamingo' ) ); ?></th>
++                    <td>
++                        <?php echo esc_html( number_format_i18n( $empty_count ) ); ?>
++                        <?php if ( $empty_count > 0 ) : ?>
++                            <form method="post" style="display:inline;">
++                                <?php wp_nonce_field( 'flamingo_tools' ); ?>
++                                <input type="hidden" name="action" value="delete_empty_contacts" />
++                                <?php submit_button( __( 'Delete', 'flamingo' ), 'delete small', 'submit', false ); ?>
++                            </form>
++                        <?php endif; ?>
++                    </td>
++                </tr>
++                <tr>
++                    <th><?php echo esc_html( __( 'Unused Terms', 'flamingo' ) ); ?></th>
++                    <td>
++                        <?php echo esc_html( number_format_i18n( $unused_terms_count ) ); ?>
++                        <?php if ( $unused_terms_count > 0 ) : ?>
++                            <form method="post" style="display:inline;">
++                                <?php wp_nonce_field( 'flamingo_tools' ); ?>
++                                <input type="hidden" name="action" value="clean_unused_terms" />
++                                <?php submit_button( __( 'Delete', 'flamingo' ), 'secondary small', 'submit', false ); ?>
++                            </form>
++                        <?php endif; ?>
++                    </td>
++                </tr>
++            </table>
++        </div>
++
++        <?php if ( $duplicate_count > 0 ) : ?>
++            <div class="card" id="duplicates">
++                <h2><?php echo esc_html( __( 'Duplicate Contacts', 'flamingo' ) ); ?></h2>
++                <p><?php echo esc_html( __( 'These contacts have the same email address. You may want to merge them manually.', 'flamingo' ) ); ?></p>
++                <table class="wp-list-table widefat fixed striped">
++                    <thead>
++                        <tr>
++                            <th><?php echo esc_html( __( 'Email', 'flamingo' ) ); ?></th>
++                            <th><?php echo esc_html( __( 'Count', 'flamingo' ) ); ?></th>
++                            <th><?php echo esc_html( __( 'Actions', 'flamingo' ) ); ?></th>
++                        </tr>
++                    </thead>
++                    <tbody>
++                        <?php
++                        $duplicates = flamingo_find_duplicate_contacts();
++                        foreach ( $duplicates as $dup ) :
++                        ?>
++                            <tr>
++                                <td><?php echo esc_html( $dup->email ); ?></td>
++                                <td><?php echo esc_html( $dup->count ); ?></td>
++                                <td>
++                                    <a href="<?php echo esc_url( add_query_arg( 's', $dup->email, menu_page_url( 'flamingo', false ) ) ); ?>">
++                                        <?php echo esc_html( __( 'View', 'flamingo' ) ); ?>
++                                    </a>
++                                </td>
++                            </tr>
++                        <?php endforeach; ?>
++                    </tbody>
++                </table>
++            </div>
++        <?php endif; ?>
++    </div>
++    <?php
++}
++```
++
++### 3. Add to Admin Menu
++
++```php
++function flamingo_add_tools_page() {
++    add_submenu_page(
++        'flamingo',
++        __( 'Tools', 'flamingo' ),
++        __( 'Tools', 'flamingo' ),
++        'manage_options',
++        'flamingo-tools',
++        'flamingo_tools_page'
++    );
++}
++add_action( 'admin_menu', 'flamingo_add_tools_page', 9 );
++```
++
++## Benefits
++- Maintains database health
++- Identifies data integrity issues
++- Easy cleanup of orphaned data
++- Identifies duplicate entries
++- Improves plugin performance
++- Reduces database size
++
++## Safety Features
++- Requires admin capabilities
++- Shows preview before cleanup
++- Uses nonces for security
++- Logs all cleanup actions (if debug logging enabled)
++
++## Files to Add/Modify
++- Create: `admin/includes/tools.php`
++- Modify: `admin/admin.php` (add submenu)
++
++## Priority
++**Priority 3 - Maintenance Feature**
++
++## Co-Authors
++- Claude (code@claude.ai)
++- Ojārs Kapteinis (ojars@kapteinis.lv)
++```
++
++---
++
++### Issue 3: Export/Import Configuration
++
++**Title:** Add Settings Export/Import for Easy Site Migration
++
++**Labels:** `enhancement`, `priority-3`, `usability`
++
++**Description:**
++```markdown
++## Summary
++Add the ability to export and import plugin settings for easier site migration and configuration backup.
++
++## Rationale
++Users who maintain multiple WordPress sites or migrate sites would benefit from:
++- Backing up plugin configuration
++- Copying settings between sites
++- Restoring settings after reinstallation
++
++## Proposed Implementation
++
++### 1. Export Function
++
++```php
++/**
++ * Exports plugin settings as JSON.
++ *
++ * @return string JSON string of settings.
++ */
++function flamingo_export_settings() {
++    $settings = array(
++        'version' => FLAMINGO_VERSION,
++        'exported_at' => current_time( 'mysql' ),
++        'site_url' => get_site_url(),
++        'settings' => array(
++            'debug_enabled' => get_option( 'flamingo_debug_enabled', false ),
++            'move_trash_days' => FLAMINGO_MOVE_TRASH_DAYS,
++        ),
++        // Don't export actual data, just configuration
++    );
++
++    return wp_json_encode( $settings, JSON_PRETTY_PRINT );
++}
++
++/**
++ * Handles settings export download.
++ */
++function flamingo_handle_export() {
++    if ( ! current_user_can( 'manage_options' ) ) {
++        wp_die( __( 'You do not have permission to export settings.', 'flamingo' ) );
++    }
++
++    check_admin_referer( 'flamingo_export_settings' );
++
++    $json = flamingo_export_settings();
++    $filename = 'flamingo-settings-' . date( 'Y-m-d' ) . '.json';
++
++    header( 'Content-Type: application/json' );
++    header( 'Content-Disposition: attachment; filename=' . $filename );
++    header( 'Cache-Control: no-cache, no-store, must-revalidate' );
++    header( 'Pragma: no-cache' );
++    header( 'Expires: 0' );
++
++    echo $json;
++    exit;
++}
++```
++
++### 2. Import Function
++
++```php
++/**
++ * Imports settings from JSON.
++ *
++ * @param string $json JSON settings string.
++ * @return WP_Error|true True on success, WP_Error on failure.
++ */
++function flamingo_import_settings( $json ) {
++    $settings = json_decode( $json, true );
++
++    if ( json_last_error() !== JSON_ERROR_NONE ) {
++        return new WP_Error(
++            'invalid_json',
++            __( 'Invalid JSON format.', 'flamingo' )
++        );
++    }
++
++    if ( ! isset( $settings['version'] ) ) {
++        return new WP_Error(
++            'invalid_format',
++            __( 'Invalid settings format.', 'flamingo' )
++        );
++    }
++
++    // Version check
++    if ( version_compare( $settings['version'], FLAMINGO_VERSION, '>' ) ) {
++        return new WP_Error(
++            'version_mismatch',
++            sprintf(
++                __( 'Settings are from a newer version (%s). Current version is %s.', 'flamingo' ),
++                $settings['version'],
++                FLAMINGO_VERSION
++            )
++        );
++    }
++
++    // Import settings
++    if ( isset( $settings['settings'] ) ) {
++        foreach ( $settings['settings'] as $key => $value ) {
++            update_option( 'flamingo_' . $key, $value );
++        }
++    }
++
++    return true;
++}
++
++/**
++ * Handles settings import upload.
++ */
++function flamingo_handle_import() {
++    if ( ! current_user_can( 'manage_options' ) ) {
++        wp_die( __( 'You do not have permission to import settings.', 'flamingo' ) );
++    }
++
++    check_admin_referer( 'flamingo_import_settings' );
++
++    if ( empty( $_FILES['import_file'] ) ) {
++        wp_die( __( 'No file uploaded.', 'flamingo' ) );
++    }
++
++    $file = $_FILES['import_file'];
++
++    if ( $file['error'] !== UPLOAD_ERR_OK ) {
++        wp_die( __( 'File upload error.', 'flamingo' ) );
++    }
++
++    $json = file_get_contents( $file['tmp_name'] );
++    $result = flamingo_import_settings( $json );
++
++    if ( is_wp_error( $result ) ) {
++        wp_die( $result->get_error_message() );
++    }
++
++    wp_safe_redirect( add_query_arg(
++        array(
++            'page' => 'flamingo-settings',
++            'imported' => '1',
++        ),
++        admin_url( 'admin.php' )
++    ) );
++    exit;
++}
++```
++
++### 3. Admin UI
++
++Add to settings page:
++
++```php
++<div class="card">
++    <h2><?php echo esc_html( __( 'Export Settings', 'flamingo' ) ); ?></h2>
++    <p><?php echo esc_html( __( 'Export your plugin settings as a JSON file. This includes configuration but not your actual contact or message data.', 'flamingo' ) ); ?></p>
++
++    <form method="post" action="<?php echo admin_url( 'admin-post.php' ); ?>">
++        <?php wp_nonce_field( 'flamingo_export_settings' ); ?>
++        <input type="hidden" name="action" value="flamingo_export_settings" />
++        <?php submit_button( __( 'Export Settings', 'flamingo' ), 'secondary', 'submit', false ); ?>
++    </form>
++</div>
++
++<div class="card">
++    <h2><?php echo esc_html( __( 'Import Settings', 'flamingo' ) ); ?></h2>
++    <p><?php echo esc_html( __( 'Import settings from a previously exported JSON file.', 'flamingo' ) ); ?></p>
++    <p class="description"><?php echo esc_html( __( 'Warning: This will overwrite your current settings.', 'flamingo' ) ); ?></p>
++
++    <form method="post" action="<?php echo admin_url( 'admin-post.php' ); ?>" enctype="multipart/form-data">
++        <?php wp_nonce_field( 'flamingo_import_settings' ); ?>
++        <input type="hidden" name="action" value="flamingo_import_settings" />
++        <input type="file" name="import_file" accept=".json" required />
++        <?php submit_button( __( 'Import Settings', 'flamingo' ), 'secondary', 'submit', false ); ?>
++    </form>
++</div>
++```
++
++### 4. Register Admin Actions
++
++```php
++add_action( 'admin_post_flamingo_export_settings', 'flamingo_handle_export' );
++add_action( 'admin_post_flamingo_import_settings', 'flamingo_handle_import' );
++```
++
++## Benefits
++- Easy site migration
++- Configuration backup
++- Multi-site management
++- Disaster recovery
++- Testing/staging environments
++
++## Security Considerations
++- Requires `manage_options` capability
++- Validates JSON format
++- Version compatibility checks
++- Nonce verification
++- Does not export sensitive data (API keys would need special handling)
++
++## Files to Modify
++- Create: `admin/includes/import-export.php`
++- Modify: `admin/admin.php` (add settings page sections)
++
++## Future Enhancements
++- Export/import contact tags
++- Export/import channel configurations
++- Selective import (choose what to import)
++
++## Priority
++**Priority 3 - Usability Enhancement**
++
++## Co-Authors
++- Claude (code@claude.ai)
++- Ojārs Kapteinis (ojars@kapteinis.lv)
++```
+-- 
+2.43.0
+

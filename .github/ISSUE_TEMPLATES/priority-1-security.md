@@ -88,14 +88,13 @@ The plugin now sanitizes inputs but lacks comprehensive validation for:
 function flamingo_validate_contact_data( $data ) {
     $errors = new WP_Error();
 
-    // Email validation
-    if ( empty( $data['email'] ) || ! is_email( $data['email'] ) ) {
-        $errors->add( 'invalid_email', __( 'Invalid email address.', 'flamingo' ) );
-    }
-
-    // Email length check
-    if ( strlen( $data['email'] ) > 254 ) {
-        $errors->add( 'email_too_long', __( 'Email address too long.', 'flamingo' ) );
+    // Email validation with proper elseif chain to prevent PHP notices
+    if ( empty( $data['email'] ) ) {
+        $errors->add( 'empty_email', __( 'Email address is required.', 'flamingo' ) );
+    } elseif ( strlen( $data['email'] ) > 254 ) {
+        $errors->add( 'email_too_long', __( 'Email address too long (max 254 characters).', 'flamingo' ) );
+    } elseif ( ! is_email( $data['email'] ) ) {
+        $errors->add( 'invalid_email', __( 'Invalid email address format.', 'flamingo' ) );
     }
 
     // Name length check

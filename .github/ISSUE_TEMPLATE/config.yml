@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://contactform7.com/flamingo/
+    about: Please read the documentation before opening an issue
+  - name: Security Audit Report
+    url: https://github.com/okapteinis/flamingo/blob/nightly/claude.md
+    about: View the comprehensive security audit report

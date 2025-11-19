@@ -174,18 +174,24 @@ function flamingo_load_contact_admin() {
 			check_admin_referer( 'flamingo-update-contact_' . $post->id() );
 
 			// Sanitize contact properties to prevent data integrity and XSS issues
-		$contact_data = array();
-		if ( isset( $_POST['contact'] ) && is_array( $_POST['contact'] ) ) {
-			foreach ( $_POST['contact'] as $key => $value ) {
-				$sanitized_key = sanitize_key( $key );
-				if ( is_array( $value ) ) {
-					$contact_data[$sanitized_key] = array_map( 'sanitize_text_field', $value );
-				} else {
-					$contact_data[$sanitized_key] = sanitize_text_field( $value );
+			// Recursive sanitization function for deeply nested arrays
+			$sanitize_recursive = function( $data ) use ( &$sanitize_recursive ) {
+				if ( is_array( $data ) ) {
+					$sanitized = array();
+					foreach ( $data as $key => $value ) {
+						$sanitized_key = sanitize_key( $key );
+						$sanitized[$sanitized_key] = $sanitize_recursive( $value );
+					}
+					return $sanitized;
 				}
+				return sanitize_text_field( $data );
+			};
+
+			$contact_data = array();
+			if ( isset( $_POST['contact'] ) && is_array( $_POST['contact'] ) ) {
+				$contact_data = $sanitize_recursive( $_POST['contact'] );
 			}
-		}
-		$post->props = $contact_data;
+			$post->props = $contact_data;
 
 			// Sanitize contact name field
 		$post->name = isset( $_POST['contact']['name'] )

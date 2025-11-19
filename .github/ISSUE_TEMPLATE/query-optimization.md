@@ -14,35 +14,38 @@ Each row in list views triggers individual queries for metadata, causing perform
 
 ## Proposed Solution
 
-```php
-function flamingo_prefetch_meta( $post_ids, $meta_keys ) {
-    global $wpdb;
+Use WordPress's built-in `update_post_meta_cache()` function which properly primes the cache for subsequent `get_post_meta()` calls:
 
-    if ( empty( $post_ids ) || empty( $meta_keys ) ) {
+```php
+/**
+ * Prefetch metadata for multiple posts to prevent N+1 queries.
+ *
+ * @param array $post_ids Array of post IDs to prefetch meta for.
+ */
+function flamingo_prefetch_meta( $post_ids ) {
+    if ( empty( $post_ids ) ) {
         return;
     }
 
-    $post_ids_placeholder = implode( ',', array_fill( 0, count( $post_ids ), '%d' ) );
-    $meta_keys_placeholder = implode( ',', array_fill( 0, count( $meta_keys ), '%s' ) );
+    // Use WordPress built-in function to prime meta cache
+    // This properly integrates with get_post_meta() calls
+    update_post_meta_cache( $post_ids );
+}
+```
 
-    $query = $wpdb->prepare(
-        "SELECT post_id, meta_key, meta_value
-         FROM {$wpdb->postmeta}
-         WHERE post_id IN ($post_ids_placeholder)
-         AND meta_key IN ($meta_keys_placeholder)",
-        array_merge( $post_ids, $meta_keys )
-    );
+### Usage in List Views
+```php
+// In admin list table prepare_items()
+$posts = $this->items;
+$post_ids = wp_list_pluck( $posts, 'ID' );
 
-    $results = $wpdb->get_results( $query );
+// Prime the meta cache before iterating
+flamingo_prefetch_meta( $post_ids );
 
-    // Prime the WordPress object cache
-    foreach ( $results as $row ) {
-        wp_cache_set(
-            $row->post_id . '_' . $row->meta_key,
-            $row->meta_value,
-            'flamingo_meta'
-        );
-    }
+// Now get_post_meta() calls will use cached data
+foreach ( $posts as $post ) {
+    $meta = get_post_meta( $post->ID, '_flamingo_email', true );
+    // No additional query - uses primed cache
 }
 ```
 

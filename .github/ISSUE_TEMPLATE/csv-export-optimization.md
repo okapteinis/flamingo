@@ -50,10 +50,20 @@ function flamingo_export_csv_batched( $args, $batch_size = 500 ) {
 
         $offset += $batch_size;
 
-        // Clear memory between batches
-        wp_cache_flush();
+        // Free batch memory without flushing entire cache
+        unset( $batch );
     }
 }
+```
+
+### 3. Alternative: Disable Query Caching
+```php
+// Pass 'cache_results' => false to WP_Query to prevent caching
+$batch = flamingo_get_records( array_merge( $args, array(
+    'offset' => $offset,
+    'limit' => $batch_size,
+    'cache_results' => false,
+) ) );
 ```
 
 ## Benefits

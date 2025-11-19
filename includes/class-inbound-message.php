@@ -1,28 +1,154 @@
 <?php
+/**
+ * Flamingo_Inbound_Message class
+ *
+ * Manages inbound messages from contact forms.
+ * Messages are stored as custom post types with extensive metadata.
+ *
+ * @package Flamingo
+ * @since 1.0.0
+ */
 
 class Flamingo_Inbound_Message {
 
+	/**
+	 * Custom post type identifier for inbound messages.
+	 *
+	 * @var string
+	 */
 	const post_type = 'flamingo_inbound';
+
+	/**
+	 * Post status identifier for spam messages.
+	 *
+	 * @var string
+	 */
 	const spam_status = 'flamingo-spam';
+
+	/**
+	 * Taxonomy identifier for message channels.
+	 *
+	 * @var string
+	 */
 	const channel_taxonomy = 'flamingo_inbound_channel';
 
+	/**
+	 * Total number of items found in last query.
+	 *
+	 * @var int
+	 */
 	private static $found_items = 0;
 
+	/**
+	 * Message post ID.
+	 *
+	 * @var int
+	 */
 	private $id;
+
+	/**
+	 * Message channel identifier.
+	 *
+	 * @var string
+	 */
 	public $channel;
+
+	/**
+	 * Form submission status.
+	 *
+	 * @var string
+	 */
 	public $submission_status;
+
+	/**
+	 * Message subject line.
+	 *
+	 * @var string
+	 */
 	public $subject;
+
+	/**
+	 * Sender information (combined name and email).
+	 *
+	 * @var string
+	 */
 	public $from;
+
+	/**
+	 * Sender name.
+	 *
+	 * @var string
+	 */
 	public $from_name;
+
+	/**
+	 * Sender email address.
+	 *
+	 * @var string
+	 */
 	public $from_email;
+
+	/**
+	 * Form field data.
+	 *
+	 * @var array
+	 */
 	public $fields;
+
+	/**
+	 * Additional metadata.
+	 *
+	 * @var array
+	 */
 	public $meta;
+
+	/**
+	 * Akismet spam detection data.
+	 *
+	 * @var array
+	 */
 	public $akismet;
+
+	/**
+	 * reCAPTCHA verification data.
+	 *
+	 * @var array
+	 */
 	public $recaptcha;
+
+	/**
+	 * Whether the message is marked as spam.
+	 *
+	 * @var bool
+	 */
 	public $spam;
+
+	/**
+	 * Spam detection log entries.
+	 *
+	 * @var array
+	 */
 	public $spam_log;
+
+	/**
+	 * User consent data.
+	 *
+	 * @var array
+	 */
 	public $consent;
+
+	/**
+	 * Message timestamp.
+	 *
+	 * @var int|null
+	 */
 	private $timestamp = null;
+
+	/**
+	 * Message hash for duplicate detection.
+	 *
+	 * @var string|null
+	 */
 	private $hash = null;
 
 	public static function register_post_type() {
@@ -269,6 +395,16 @@ class Flamingo_Inbound_Message {
 		}
 
 		$post_id = wp_insert_post( $postarr );
+
+		// Check for errors during post insertion
+		if ( is_wp_error( $post_id ) ) {
+			error_log( sprintf(
+				'Flamingo: Failed to save inbound message "%s" - %s',
+				$this->subject,
+				$post_id->get_error_message()
+			) );
+			return false;
+		}
 
 		if ( $post_id ) {
 			$this->id = $post_id;
